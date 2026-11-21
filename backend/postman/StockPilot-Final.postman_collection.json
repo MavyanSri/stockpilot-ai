@@ -1,0 +1,1281 @@
+{
+  "info": {
+    "name": "StockPilot Final - Local API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Use this collection's Variables tab. Enter email once. Register and log in directly (OTP removed). Requests use collection values automatically."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "01 Account \u2014 send one at a time",
+      "item": [
+        {
+          "name": "01 Register user [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Inventory Manager\",\n  \"email\": {{emailJson}},\n  \"password\": {{passwordJson}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('emailJson', JSON.stringify(String(pm.collectionVariables.get('email') || '')));",
+                  "pm.variables.set('passwordJson', JSON.stringify(String(pm.collectionVariables.get('password') || '')));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.email).to.eql(String(pm.variables.get(\"email\")).trim().toLowerCase()); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Verify code from inbox [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/verify-otp",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{emailJson}},\n  \"otp\": {{otpJson}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('emailJson', JSON.stringify(String(pm.collectionVariables.get('email') || '')));",
+                  "pm.variables.set('otpJson', JSON.stringify(String(pm.collectionVariables.get('otp') || '')));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.message).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Log in and save token [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{emailJson}},\n  \"password\": {{passwordJson}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('token');",
+                  "pm.variables.set('emailJson', JSON.stringify(String(pm.collectionVariables.get('email') || '')));",
+                  "pm.variables.set('passwordJson', JSON.stringify(String(pm.collectionVariables.get('password') || '')));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.set('token', pm.response.json().accessToken);",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.tokenType).to.eql(\"Bearer\"); pm.expect(j.accessToken.split(\".\")).to.have.lengthOf(3); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Inventory demo \u2014 send in order",
+      "item": [
+        {
+          "name": "04 Create supplier [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/suppliers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"City Electronics\",\n  \"phone\": \"9876500000\",\n  \"leadTimeDays\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.set('supplierId', pm.response.json().id);",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.id).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 List suppliers [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/suppliers"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.some(s=>s.id===Number(pm.collectionVariables.get(\"supplierId\")))).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Edit supplier [200]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/suppliers/{{supplierId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"City Electronics\",\n  \"phone\": \"9876500000\",\n  \"leadTimeDays\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.leadTimeDays).to.eql(5); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 Create product [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"{{sku}}\",\n  \"name\": \"USB-C Cable\",\n  \"supplierId\": {{supplierId}},\n  \"minStock\": 4,\n  \"sellingPrice\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('sku','CABLE-'+Date.now());",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.set('productId', pm.response.json().id);",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.currentStock).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 List products [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.some(p=>p.id===Number(pm.collectionVariables.get(\"productId\")))).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 Edit product [200]",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/products/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"{{sku}}\",\n  \"name\": \"USB-C Cable\",\n  \"supplierId\": {{supplierId}},\n  \"minStock\": 4,\n  \"sellingPrice\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.sku).to.eql(pm.collectionVariables.get(\"sku\")); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 Opening stock of 6 [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/stock-transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"type\": \"IN\",\n  \"reason\": \"OPENING\",\n  \"quantity\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.currentStock).to.eql(6); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 Sell 2 cables [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/stock-transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"type\": \"OUT\",\n  \"reason\": \"SALE\",\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Balance 4 and low stock',()=>{const j=pm.response.json();pm.expect(j.currentStock).to.equal(4);pm.expect(j.lowStock).to.be.true;});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 Stock history [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/stock-transactions?productId={{productId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.some(m=>m.reason===\"SALE\" && m.quantity===2)).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Dashboard [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/summary"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j).to.include.all.keys(\"productCount\",\"lowStockCount\",\"openOrderCount\",\"todayRevenue\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Low stock [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/alerts/low-stock"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.some(p=>p.id===Number(pm.collectionVariables.get(\"productId\")) && p.currentStock===4)).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 Sales report [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reports/sales?from={{fromDate}}&to={{toDate}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const t=new Date(); const d=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); pm.collectionVariables.set('toDate',d(t)); t.setDate(t.getDate()-6); pm.collectionVariables.set('fromDate',d(t));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); const row=j.products.find(p=>p.productId===Number(pm.collectionVariables.get(\"productId\"))); pm.expect(row.units).to.eql(2); pm.expect(Number(row.revenue)).to.eql(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Demand forecast [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ai/forecast?productId={{productId}}&days=7"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.days).to.eql(7); pm.expect(j.history).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Optimization assistant [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ai/stock-insights?productId={{productId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.data.currentStock).to.eql(4); pm.expect(j.source).to.be.oneOf([\"LLM\",\"CALCULATION_ONLY\"]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "18 Purchase suggestions [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/ai/purchase-recommendations"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.data.some(r=>r.productId===Number(pm.collectionVariables.get(\"productId\")) && r.suggestedQuantity>0)).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "19 Place supplier order [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/purchase-orders",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": {{supplierId}},\n  \"items\": [\n    {\n      \"productId\": {{productId}},\n      \"quantity\": 8,\n      \"unitCost\": 60\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.set('orderId', pm.response.json().id);",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.status).to.eql(\"ORDERED\"); pm.expect(j.items[0].product.currentStock).to.eql(4); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "20 List orders [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/purchase-orders"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.some(o=>o.id===Number(pm.collectionVariables.get(\"orderId\")))).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "21 Order details [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/purchase-orders/{{orderId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.items[0].quantity).to.eql(8); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "22 Receive full order [200]",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/purchase-orders/{{orderId}}/receive"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order received',()=>pm.expect(pm.response.json().status).to.equal('RECEIVED'));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.items[0].product.currentStock).to.eql(12); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "23 Confirm final balance after duplicate receipt [200]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.find(p=>p.id===Number(pm.collectionVariables.get(\"productId\"))).currentStock).to.eql(12); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Live AI question \u2014 requires provider key",
+      "item": [
+        {
+          "name": "24 Ask inventory [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/ai/ask",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What were the top selling products in the last 7 days?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.test('Response data', () => { const j=pm.response.json(); pm.expect(j.answer).to.be.a(\"string\").and.not.empty; pm.expect(j.report).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Optional checks \u2014 read the precondition",
+      "item": [
+        {
+          "name": "25 Signed-out dashboard [401]",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/dashboard/summary",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "26 Login with invalid credentials [401]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{emailJson}},\n  \"password\": \"WrongPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Invalid login credentials must return 401 Unauthorized."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('emailJson', JSON.stringify(String(pm.collectionVariables.get('email') || '')));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "27 Reject overselling [409]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/stock-transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": {{productId}},\n  \"type\": \"OUT\",\n  \"reason\": \"SALE\",\n  \"quantity\": 1000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "This demo product has at most 12 units. Expect 409 both before and after receipt."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "28 Reject duplicate receipt [409]",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/purchase-orders/{{orderId}}/receive",
+            "description": "Send after the order has already been received."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "29 OPTIONAL resend OTP [200]",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/resend-otp",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{emailJson}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set('emailJson', JSON.stringify(String(pm.collectionVariables.get('email') || '')));",
+                  "for (const key of [\"baseUrl\", \"email\", \"password\", \"otp\", \"token\", \"supplierId\", \"productId\", \"orderId\", \"sku\", \"fromDate\", \"toDate\"]) {",
+                  "  const value = pm.collectionVariables.get(key);",
+                  "  const numericId = ['supplierId','productId','orderId'].includes(key);",
+                  "  pm.variables.set(key, numericId ? (Number(value) || 0) : String(value || ''));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "StockPilot-b0593c1d54e7!",
+      "type": "string"
+    },
+    {
+      "key": "otp",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supplierId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sku",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fromDate",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "toDate",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
